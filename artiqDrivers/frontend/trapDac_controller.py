@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from artiq.devices.trapDac.driver import TrapDac, TrapDacSim
+from artiqDrivers.devices.trapDac.driver import TrapDac, TrapDacSim
 from artiq.protocols.pc_rpc import simple_server_loop
 from artiq.tools import verbosity_args, simple_network_args, init_logger
 

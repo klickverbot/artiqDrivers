@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from artiq.devices.dosDac.driver import DosDac, DosDacSim
+from artiqDrivers.devices.dosDac.driver import DosDac, DosDacSim
 from artiq.protocols.pc_rpc import simple_server_loop
 from artiq.tools import verbosity_args, simple_network_args, init_logger
 

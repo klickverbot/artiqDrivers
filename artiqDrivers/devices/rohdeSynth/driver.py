@@ -25,7 +25,7 @@ class RohdeSynth:
         self.sock.send(data.encode())
 
     def query(self, data):
-        self.send(data.encode())
+        self.send(data)
         with self.sock.makefile() as f:
             response = f.readline().strip()
         return response

@@ -9,7 +9,7 @@ from artiq.tools import verbosity_args, simple_network_args, init_logger
 
 
 def get_argparser():
-    parser = argparse.ArgumentParser(description="ARTIQ controller for the Rohde&Schwarz SMA100A synthesiser"")
+    parser = argparse.ArgumentParser(description="ARTIQ controller for the Rohde&Schwarz SMA100A synthesiser")
     parser.add_argument("-i", "--ipaddr", default=None,
                         help="IP address of synth")
     parser.add_argument("--simulation", action="store_true",

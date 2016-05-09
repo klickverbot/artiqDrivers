@@ -26,4 +26,6 @@ var/
 *.manifest
 *.spec
 
+# Crap
 .DS_Store
+*~

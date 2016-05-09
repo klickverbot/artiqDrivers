@@ -1,0 +1,35 @@
+# Udev rules to control how (mainly usb) devices are addressed
+#
+# This file must be placed at:
+# 	/etc/udev/rules.d/99-artiqDrivers.rules
+# To install, type this command in a terminal:
+# 	sudo cp 99-artiqDrivers.rules /etc/udev/rules.d/.
+#
+# Then restart udev:
+#	sudo service udev restart
+
+
+# Make all Arduino Unos appear as \dev\arduino_<serial> The last device to enumerate is also linked to as \dev\arduino
+SUBSYSTEMS=="usb", ATTRS{product}=="Arduino Uno", SYMLINK+="arduino arduino_$attr{serial}"
+
+# Make all Arduino Megas appear as \dev\arduino_<serial> The last device to enumerate is also linked to as \dev\arduino
+SUBSYSTEMS=="usb", ATTRS{product}=="Arduino Mega 2560", SYMLINK+="arduino arduino_$attr{serial}"
+
+# Make all Digilent Chip Kits appear as \dev\arduino_<serial> The last device to enumerate is also linked to \dev\arduino
+SUBSYSTEMS=="usb", ATTRS{product}=="FT232R USB UART", SYMLINK+="arduino arduino_$attr{serial}"
+
+# Make all prologix GPIB controllers enumerate as \dev\gpib_<serial> (this does not work with some of the prologix devices - they only identify themselves as FT242 devices, see rule below)
+KERNEL=="ttyUSB*", ATTRS{manufacturer}=="Prologix", ATTRS{product}=="Prologix GPIB-USB Controller", SYMLINK+="gpib_$attr{serial}"
+
+# List all FTDI FT242 USB-Serial converters at \dev\ttyUSB_<serial>
+KERNEL=="ttyUSB*", ATTRS{manufacturer}=="FTDI", ATTRS{product}=="FT245R USB FIFO", SYMLINK+="ttyUSB_$attr{serial}"
+
+# Milldown DDS boards enumerate as \dev\milldown_<serial>_i<xx>. Where <xx> is the interface number (00 for the USB-JTAG
+# port and 01 for the main USB-serial interface to the device firmware.)
+# Since udev doesn't allow matching attributes across subsystems, and since the serial and interface numbers belong to different
+# subsystems, we use an environment variable to cache the serial number. Tested on Ubuntu 14.04.
+SUBSYSTEMS=="usb", ATTRS{manufacturer}=="Enterpoint", ATTRS{product}=="Milldown_DDS", ENV{milldown_serial}="$attr{serial}"
+SUBSYSTEMS=="usb", ATTRS{interface}=="Milldown_DDS", SYMLINK+="milldown_$env{milldown_serial}_i$attr{bInterfaceNumber}"
+
+# Make all TTI power supplies enumerate as \dev\psu_<serial>
+KERNEL=="ttyUSB*", ATTRS{manufacturer}=="TTi", ATTRS{product}=="QL355*", SYMLINK+="psu_$attr{serial}"

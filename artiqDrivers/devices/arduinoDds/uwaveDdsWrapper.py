@@ -8,13 +8,13 @@ class UwaveDdsWrapper:
 
         self.dds = dmgr.get(device)
 
-        zeroFieldFrequency = 3225.608e6 # S1/2 F=4 - F=3 splitting at zero field, Hz
+        zeroFieldFrequency = 3225.6082864e6 # S1/2 F=4 - F=3 splitting at zero field, Hz
         
         # To get the DDS frequency, subtract off target frequency from this offset frequency
-        self.offsetFrequency = LOfrequency - zeroFieldFrequency
+        self.offsetFrequency = - LOfrequency + zeroFieldFrequency
     
 
     def setProfile(self, profile, freq, phase=0.0, amp=1.0):
-        freqDDS = self.offsetFrequency - freq
+        freqDDS = self.offsetFrequency + freq
         
         self.dds.setProfile(profile, freqDDS, phase, amp)

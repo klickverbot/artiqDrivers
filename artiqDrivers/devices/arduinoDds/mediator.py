@@ -15,7 +15,7 @@ class ProfileSwitcher:
         self.p2 = dmgr.get(profile_lines[2])
         
         self.interProfileDelay_mu = seconds_to_mu(interProfileDelay, self.core)
-        self.finalDelay_mu = seconds_to_mu(finalDelay_mu, self.core)
+        self.finalDelay_mu = seconds_to_mu(finalDelay, self.core)
 
         
     @kernel
@@ -27,19 +27,19 @@ class ProfileSwitcher:
             self.p2.on()
         else:
             self.p2.off()
-        delay(self.interProfileDelay_mu*ns)      
+        delay(200*ns)#self.interProfileDelay_mu)      
       
         if profile & 0x2:
             self.p1.on()
         else:
             self.p1.off()
-        delay(self.interProfileDelay_mu*ns)
+        delay(200*ns)#self.interProfileDelay_mu)
         
         if profile & 0x1:
             self.p0.on()
         else:
             self.p0.off()
-        delay(self.finalDelay_mu)        
+        delay(200*ns)#self.finalDelay_mu)        
         
 
 class InvalidProfile(Exception):

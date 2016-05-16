@@ -46,6 +46,20 @@ class RohdeSynth:
         self.send("POW:OFFS 0\n")
 
 
+    def rfOutput(self):
+        """Query whether RF output is activated"""
+        resp = self.query("OUTP?\n")
+        if resp == '1':
+            return True
+        elif resp == '0':
+            return False
+        else:
+            raise Exception("Unknown response")
+
+    def setRfOutput(self, on):
+        """Turn RF output on or off with boolean value"""
+        self.send("OUTP {}\n".format("ON" if on else "OFF"))
+
     def setFrequency(self, frequency):
         """Set frequency in Hz"""
         if frequency < 9e3 or frequency > 3e9:
@@ -60,9 +74,9 @@ class RohdeSynth:
 
 
     def setPower(self, power):
-        """Set power level in dBm. Limited to +5 dBm by choice not instrument"""
-        if power < -120 or power > 5:
-            msg = "Power '{}' invalid: should be a float between -120dBm and +5dBm"
+        """Set power level in dBm"""
+        if power < -120 or power > 20:
+            msg = "Power '{}' invalid: should be a float between -120dBm and +20dBm"
             raise ValueError(msg.format(power))
 
         self.send("POW {}\n".format(power))
@@ -79,6 +93,12 @@ class RohdeSynth:
 
 
 class RohdeSynthSim:
+    def setRfOutput(self, on):
+        pass
+
+    def rfOutput(self):
+        return True
+
     def setFrequency(self, frequency):
         pass
 
@@ -90,6 +110,9 @@ class RohdeSynthSim:
 
     def power(self):
         return -42
+
+    def identity(self):
+        return "RohdeSynthSim"
 
     def close(self):
         pass

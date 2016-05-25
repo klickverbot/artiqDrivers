@@ -61,6 +61,7 @@ class ArduinoDds:
             raise ValueError("DDS frequency word should be an integer between 0 and 0xffffffff")
         
         self.send('PLSB {} {} {} {}\n'.format( profile, amp, phase, freq) );
+        time.sleep(0.01)
 
     def reset(self):
         self.send("reset\n")

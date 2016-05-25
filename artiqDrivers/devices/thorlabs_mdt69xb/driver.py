@@ -20,9 +20,21 @@ class PiezoController:
                 baudrate=115200,
                 rtscts=True,
                 timeout=0.1)
+            self._purge()
 
         self.vLimit = self.get_voltage_limit()
         logger.info("Device vlimit is {}".format(self.vLimit))
+
+    def _purge(self):
+        """Make sure we start from a clean slate with the controller"""
+        if not self.simulation:
+            # Send a carriage return to clear the controller's input buffer
+            self.port.write('\r'.encode())
+            # Read any old gibberish from input until a timeout occurs
+            c = 'c'
+            while c != '':
+                c = self.port.read().decode()
+            logger.info("Clean slate established")
 
     def close(self):
         """Close the serial port."""
@@ -114,3 +126,4 @@ class PiezoController:
     def ping(self):
         self.get_voltage_limit()
         return True
+

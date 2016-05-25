@@ -9,23 +9,36 @@ class PiezoWrapper:
         self.devices = { dev: dmgr.get(dev) for dev in devices }
         
         self.mappings = mappings
-        
+
     def set_channel(self, logicalChannel, value):
+        # Look up device and channel
+        (device, channel) = self._get_dev_channel(logicalChannel)
+
+        # Set the physical device & channel to the given value
+        device.set_channel(channel, value)
+
+    def get_channel(self, logicalChannel):
+        # Look up device and channel
+        (device, channel) = self._get_dev_channel(logicalChannel)
+
+        # Get physical device & channel value
+        return device.get_channel(channel)
+
+    def _get_dev_channel(self, logicalChannel):
+        """Return a (device handle, channel) tuple given a logical channel"""
         # Look up the (device name, channel name) tuple in the mappings dictionary
         try:
             (deviceName,channel) = self.mappings[logicalChannel]
         except KeyError:
             raise UnknownLogicalChannel
-        
+
         # Find the handle to the device class given by deviceName
         try:
             device = self.devices[deviceName]
         except KeyError:
             raise UnknownDeviceName
-        
-        # Set the physical device & channel to the given value
-        device.set_channel(channel, value)
-        
+
+        return (device, channel)
         
         
 class UnknownLogicalChannel(Exception):

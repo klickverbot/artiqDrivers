@@ -1,6 +1,8 @@
 import logging
 import serial
 import re
+import sys
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +32,7 @@ class PiezoController:
         """Make sure we start from a clean slate with the controller"""
         if not self.simulation:
             # Send a carriage return to clear the controller's input buffer
-            self.port.write('\r'.encode())
+            self._send_command('')
             # Read any old gibberish from input until a timeout occurs
             c = 'c'
             while c != '':
@@ -47,13 +49,20 @@ class PiezoController:
             print(cmd)
             return None
         else:
-            self.port.write((cmd+'\r').encode())
+            try:
+                self.port.write((cmd+'\r').encode())
+            except serial.SerialTimeoutException as e:
+                logger.exception("Serial write timeout: Force exit")
+                # This is hacky but makes the server exit
+                asyncio.get_event_loop().call_soon(sys.exit, 42)
+                raise
 
     def _read_line(self):
         """Read a CR terminated line. Returns '' on timeout"""
         s = ''
         while len(s) == 0 or s[-1] != '\r':
             c = self.port.read().decode()
+            print(c, end='', flush=True)
             if c == '': # Timeout
                 break
             s += c

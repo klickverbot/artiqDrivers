@@ -6,7 +6,6 @@ import sys
 from artiqDrivers.devices.thorlabs_mdt69xb.driver import PiezoController
 from artiq.protocols.pc_rpc import simple_server_loop
 from artiq.tools import verbosity_args, simple_network_args, init_logger
-from serial import SerialTimeoutException
 
 def get_argparser():
     parser = argparse.ArgumentParser(description="ARTIQ controller for the Thorlabs MDT693B or MDT694B 3 (1) channel open-loop piezo controller")
@@ -32,11 +31,11 @@ def main():
 
     dev = PiezoController(args.device if not args.simulation else None)
 
+    # Q: Why not use try/finally?
+    # A: We don't want to try to close the serial if sys.exit() is called,
+    #    and sys.exit() isn't caught by Exception
     try:
         simple_server_loop({"piezoController": dev}, args.bind, args.port)
-    except SerialTimeoutException:
-        # Can't even clean up in this case. Exit and let python do its best
-        print("Piezo serial timeout: exiting without cleanup")
     except Exception:
         dev.close()
     else:

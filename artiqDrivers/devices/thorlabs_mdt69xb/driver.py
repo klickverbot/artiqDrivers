@@ -19,7 +19,8 @@ class PiezoController:
                 serial_addr,
                 baudrate=115200,
                 rtscts=True,
-                timeout=0.1)
+                timeout=0.1,
+                write_timeout=0.1)
             self._purge()
 
         self.vLimit = self.get_voltage_limit()
@@ -126,4 +127,3 @@ class PiezoController:
     def ping(self):
         self.get_voltage_limit()
         return True
-

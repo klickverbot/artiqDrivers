@@ -105,13 +105,10 @@ class PiezoController:
 
     def get_serial(self):
         """Returns the device serial string."""
-        self._send_command('id?')
-        line = self._read_line()
-        while line != '':
-            match = re.search("Serial#:(.*)", line)
-            if match:
-                return match.group(1).strip()
-            line = self._read_line()
+        id = self.get_id()
+        match = re.search("Serial#:(.*)", id)
+        if match:
+            return match.group(1).strip()
         # If we get here we got a timeout
         raise IOError("Timeout while reading serial string")
 

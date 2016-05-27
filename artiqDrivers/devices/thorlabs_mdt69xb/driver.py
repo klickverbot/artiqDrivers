@@ -20,11 +20,12 @@ class PiezoController:
             self.port = serial.Serial(
                 serial_addr,
                 baudrate=115200,
-                rtscts=True,
                 timeout=0.1,
                 write_timeout=0.1)
             self._purge()
 
+        self.echo = None
+        self._set_echo(False)
         self.vLimit = self.get_voltage_limit()
         logger.info("Device vlimit is {}".format(self.vLimit))
 
@@ -32,7 +33,7 @@ class PiezoController:
         """Make sure we start from a clean slate with the controller"""
         if not self.simulation:
             # Send a carriage return to clear the controller's input buffer
-            self._send_command('')
+            self.port.write('\r'.encode())
             # Read any old gibberish from input until a timeout occurs
             c = 'c'
             while c != '':
@@ -57,12 +58,20 @@ class PiezoController:
                 asyncio.get_event_loop().call_soon(sys.exit, 42)
                 raise
 
+            if self.echo:
+                # Read off the echoed command to stay in sync
+                _ = self._read_line()
+            else:
+                # Read off the asterisk
+                c = self.port.read().decode()
+                if c != '*':
+                    logger.error('"{}" returned unexpected character "{}"'.format(cmd, c))
+
     def _read_line(self):
         """Read a CR terminated line. Returns '' on timeout"""
         s = ''
         while len(s) == 0 or s[-1] != '\r':
             c = self.port.read().decode()
-            print(c, end='', flush=True)
             if c == '': # Timeout
                 break
             s += c
@@ -77,6 +86,22 @@ class PiezoController:
                 return match.group(1)
             line = self._read_line()
         raise IOError("Timeout while reading bracketed string")
+
+    def _get_echo(self):
+        """Get echo mode of controller"""
+        # Made private since it is of no use to RPC clients
+        self._send_command("echo?")
+        self.echo = self._read_bracketed() == "Echo On"
+        return self.echo
+
+    def _set_echo(self, enable):
+        """Set echo mode of controller"""
+        # Made private since it is of no use to RPC clients
+        self._send_command("echo={}".format(1 if enable else 0))
+        self.echo = self._read_bracketed() == "Echo On"
+        # NB this command is awful, in that it always elicits a response
+        # of *[Echo On] or *[Echo Off] regardless, unlike all other set
+        # commands which just set the value quietly
 
     def get_serial(self):
         """Returns the device serial string."""

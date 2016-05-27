@@ -11,7 +11,16 @@ scripts = [
 
 setup(name='artiqDrivers',
     version='0.1',
-    packages=['artiqDrivers'],
+    packages=['artiqDrivers',
+              'artiqDrivers.frontend',
+              'artiqDrivers.devices',
+              'artiqDrivers.devices.arduinoDds',
+              'artiqDrivers.devices.coherentDds',
+              'artiqDrivers.devices.dosDac',
+              'artiqDrivers.devices.rohdeSynth',
+              'artiqDrivers.devices.thorlabs_mdt69xb',
+              'artiqDrivers.devices.trapDac',
+             ],
     entry_points={
         "console_scripts": scripts,
     }

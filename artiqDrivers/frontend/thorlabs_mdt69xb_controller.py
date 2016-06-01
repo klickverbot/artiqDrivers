@@ -31,7 +31,7 @@ def main():
 
     dev = PiezoController(args.device if not args.simulation else None)
 
-    # Q: Why not use try/finally?
+    # Q: Why not use try/finally for port closure?
     # A: We don't want to try to close the serial if sys.exit() is called,
     #    and sys.exit() isn't caught by Exception
     try:
@@ -40,6 +40,8 @@ def main():
         dev.close()
     else:
         dev.close()
+    finally:
+        dev.save_setpoints()
         
 if __name__ == "__main__":
     main()

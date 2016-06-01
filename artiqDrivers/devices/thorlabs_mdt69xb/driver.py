@@ -4,14 +4,12 @@ import re
 import sys
 import asyncio
 
-logger = logging.getLogger(__name__)
+import artiq.protocols.pyon as pyon
 
+logger = logging.getLogger(__name__)
 
 class PiezoController:
     """Driver for Thorlabs MDT693B 3 channel open-loop piezo controller."""
-
-    channels = ['x', 'y', 'z']
-
     def __init__(self, serial_addr):
         if serial_addr is None:
             self.simulation = True
@@ -29,6 +27,10 @@ class PiezoController:
         self.vLimit = self.get_voltage_limit()
         logger.info("Device vlimit is {}".format(self.vLimit))
 
+        self.fname = "piezo_{}.pyon".format(self.get_serial())
+        self.channels = {'x':-1, 'y':-1, 'z':-1}
+        self._load_setpoints()
+
     def _purge(self):
         """Make sure we start from a clean slate with the controller"""
         if not self.simulation:
@@ -39,6 +41,21 @@ class PiezoController:
             while c != '':
                 c = self.port.read().decode()
             logger.info("Clean slate established")
+
+    def _load_setpoints(self):
+        """Load setpoints from a file"""
+        try:
+            self.channels = pyon.load_file(self.fname)
+            logger.info("Loaded '{}', channels: {}".format(self.fname, self.channels))
+        except FileNotFoundError:
+            logger.warning("Couldn't find '{}', creating file".format(self.fname))
+            # Saves current values (-1 indicates no information)
+            self._save_setpoints()
+
+    def save_setpoints(self):
+        """Save current set values to file"""
+        pyon.store_file(self.fname, self.channels)
+        logger.info("Saved '{}', channels: {}".format(self.fname, self.channels))
 
     def close(self):
         """Close the serial port."""
@@ -115,7 +132,8 @@ class PiezoController:
     def get_id(self):
         """Returns the identity paragraph that include the device model, serial number, and firmware version. 
         This function needs to wait for a serial timeout, hence is a little slow"""
-        # Due to the crappy Thorlabs protocol (no clear finish marker) we have to wait for a timeout to ensure that we have read everything
+        # Due to the crappy Thorlabs protocol (no clear finish marker) we have
+        # to wait for a timeout to ensure that we have read everything
         self._send_command('id?')
         s = ''
         line = self._read_line()
@@ -129,6 +147,7 @@ class PiezoController:
         self._check_valid_channel(channel)
         self._check_voltage_in_limit(voltage)
         self._send_command("{}voltage={}".format( channel, voltage))
+        self.channels[channel] = voltage
 
     def get_channel(self, channel):
         """Returns the current output voltage for a given channel (one of 'x','y','z').
@@ -137,6 +156,11 @@ class PiezoController:
         self._check_valid_channel(channel)
         self._send_command("{}voltage?".format(channel))
         return float( self._read_bracketed() )
+
+    def get_channel_setpoint(self, channel):
+        """Return the last voltage set via USB for a given channel"""
+        self._check_valid_channel(channel)
+        return self.channels[channel]
 
     def get_voltage_limit(self):
         """Returns the output limit setting in Volts (one of 75V, 100V, 150V, set by

@@ -50,7 +50,7 @@ class PiezoController:
         except FileNotFoundError:
             logger.warning("Couldn't find '{}', creating file".format(self.fname))
             # Saves current values (-1 indicates no information)
-            self._save_setpoints()
+            self.save_setpoints()
 
     def save_setpoints(self):
         """Save current set values to file"""

@@ -29,3 +29,6 @@ var/
 # Crap
 .DS_Store
 *~
+
+# Piezo controller files are dumped here, don't track them
+piezo_*.pyon

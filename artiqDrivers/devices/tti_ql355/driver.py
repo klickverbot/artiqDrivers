@@ -51,7 +51,7 @@ class QL355:
 
     def _send_command(self, cmd):
         try:
-            self.port.write((cmd+'\r').encode())
+            self.port.write((cmd+'\r\n').encode())
         except serial.SerialTimeoutException as e:
             logger.exception("Serial write timeout: Force exit")
             # This is hacky but makes the server exit
@@ -76,7 +76,7 @@ class QL355:
             if channel != 0:
                 raise ex
         elif self.type is PsuType.QL355TP:
-            if channel < 0 and ( ( channel > 2 and is_enable) or channel>3 ):
+            if channel < 0 or ( ( channel > 1 and not is_enable) or channel>2 ):
                 raise ex
 
     def set_voltage_limit(self, voltage, channel=0):

@@ -25,5 +25,8 @@ setup(name='artiqDrivers',
              ],
     entry_points={
         "console_scripts": scripts,
-    }
+    },
+    install_requires = [
+        'pyserial>=3'
+    ]
 )

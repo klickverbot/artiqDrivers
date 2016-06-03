@@ -125,6 +125,28 @@ class QL355:
         # enable flag needs to be 0 or 1, hence int(bool) dance
         self._send_command("OP{} {}".format(channel+1, int(bool(enable))))
 
+    def get_voltage(self, channel=0):
+        """Returns the actual output voltage"""
+        self._check_valid_channel(channel)
+        self._send_command("V{}O?".format(channel+1))
+        response = self._read_line().strip()
+        try:
+            val = float(response[0:-1])
+        except ValueError:
+            raise ValueError("Could not interpret device response as a float")
+        return val
+
+    def get_current(self, channel=0):
+        """Returns the actual output current"""
+        self._check_valid_channel(channel)
+        self._send_command("I{}O?".format(channel+1))
+        response = self._read_line().strip()
+        try:
+            val = float(response[0:-1])
+        except ValueError:
+            raise ValueError("Could not interpret device response as a float")
+        return val
+
     def identity(self):
         """Returns the identity string of the device"""
         self._send_command("*IDN?")

@@ -26,7 +26,7 @@ class PiezoWrapper:
         # Set the physical device & channel to the given value
         if logicalChannel in self.slow_scan:
             step = self.slow_scan[logicalChannel]
-            current = device.get_channel_setpoint(channel)
+            current = device.get_channel(channel)
             if current < 0:
                 err_msg = "'{}' has no setpoint information. Calibrate with laser unlocked before reuse.".format(logicalChannel)
                 raise NoSetpointError(err_msg)

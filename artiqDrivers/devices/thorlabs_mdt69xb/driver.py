@@ -48,9 +48,7 @@ class PiezoController:
             self.channels = pyon.load_file(self.fname)
             logger.info("Loaded '{}', channels: {}".format(self.fname, self.channels))
         except FileNotFoundError:
-            logger.warning("Couldn't find '{}', creating file".format(self.fname))
-            # Saves current values (-1 indicates no information)
-            self.save_setpoints()
+            logger.warning("Couldn't find '{}', no setpoints loaded".format(self.fname))
 
     def save_setpoints(self):
         """Save current set values to file"""
@@ -95,7 +93,8 @@ class PiezoController:
         return s
 
     def _read_bracketed(self):
-        """Reads until a string enclosed in square brackets is found, and returns it."""
+        """Reads until a string enclosed in square brackets is found, and
+        returns it."""
         line = self._read_line()
         while line != '':
             match = re.search("\[(.*)\]", line)
@@ -130,8 +129,11 @@ class PiezoController:
         raise IOError("Timeout while reading serial string")
 
     def get_id(self):
-        """Returns the identity paragraph that include the device model, serial number, and firmware version. 
-        This function needs to wait for a serial timeout, hence is a little slow"""
+        """Returns the identity paragraph.
+
+        This includes the device model, serial number, and firmware version. 
+        This function needs to wait for a serial timeout, hence is a little 
+        slow"""
         # Due to the crappy Thorlabs protocol (no clear finish marker) we have
         # to wait for a timeout to ensure that we have read everything
         self._send_command('id?')
@@ -149,15 +151,16 @@ class PiezoController:
         self._send_command("{}voltage={}".format( channel, voltage))
         self.channels[channel] = voltage
 
-    def get_channel(self, channel):
-        """Returns the current output voltage for a given channel (one of 'x','y','z').
-        Note that this may well differ from the set voltage by a few volts due to ADC
-        and DAC offsets."""
+    def get_channel_output(self, channel):
+        """Returns the current *output* voltage for a given channel.
+
+        Note that this may well differ from the set voltage by a few volts due
+        to ADC and DAC offsets."""
         self._check_valid_channel(channel)
         self._send_command("{}voltage?".format(channel))
         return float( self._read_bracketed() )
 
-    def get_channel_setpoint(self, channel):
+    def get_channel(self, channel):
         """Return the last voltage set via USB for a given channel"""
         self._check_valid_channel(channel)
         return self.channels[channel]

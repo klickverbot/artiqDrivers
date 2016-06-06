@@ -38,6 +38,13 @@ class PiezoWrapper:
                     time.sleep(0.01)
         device.set_channel(channel, value)
 
+    def get_channel_output(self, logicalChannel):
+        # Look up device and channel
+        (device, channel) = self._get_dev_channel(logicalChannel)
+
+        # Get physical device & channel output value
+        return device.get_channel_output(channel)
+
     def get_channel(self, logicalChannel):
         # Look up device and channel
         (device, channel) = self._get_dev_channel(logicalChannel)
@@ -45,12 +52,10 @@ class PiezoWrapper:
         # Get physical device & channel value
         return device.get_channel(channel)
 
-    def get_channel_setpoint(self, logicalChannel):
-        # Look up device and channel
-        (device, channel) = self._get_dev_channel(logicalChannel)
-
-        # Get physical device & channel value
-        return device.get_channel_setpoint(channel)
+    def save_setpoints(self, logicalChannel):
+        """Save setpoints for controller with given logical channel"""
+        (dev, _) = self._get_dev_channel(logicalChannel)
+        dev.save_setpoints()
 
     def _get_dev_channel(self, logicalChannel):
         """Return a (device handle, channel) tuple given a logical channel"""

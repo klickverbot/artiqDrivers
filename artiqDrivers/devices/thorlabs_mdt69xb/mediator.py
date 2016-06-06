@@ -19,12 +19,16 @@ class PiezoWrapper:
         self.mappings = mappings
         self.slow_scan = slow_scan
 
-    def set_channel(self, logicalChannel, value):
+    def set_channel(self, logicalChannel, value, force=False):
+        """Set a channel to a value.
+
+        'force' flag should only be used when calibrating a slow scan
+        channel"""
         # Look up device and channel
         (device, channel) = self._get_dev_channel(logicalChannel)
 
         # Set the physical device & channel to the given value
-        if logicalChannel in self.slow_scan:
+        if logicalChannel in self.slow_scan and not force:
             step = self.slow_scan[logicalChannel]
             current = device.get_channel(channel)
             if current < 0:

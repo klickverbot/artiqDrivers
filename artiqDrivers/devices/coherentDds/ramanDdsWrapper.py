@@ -14,17 +14,17 @@ class RamanDdsWrapper:
         self.hfq = HfQubitTransitionFreq()
         
         self.msDiff = 3.2e9 # master-slave Raman laser frequency difference
-        self.trans = ['t4030'] # hyperfine transition without Zeeman shift
-        self.hfs = self.hfq.dfTrans(0,int(self.trans[2]),self.int(trans[4])) # hyperfinesplitting, independent of B
+        self.trans = 't4030' # hyperfine transition without Zeeman shift
+        self.hfs = self.hfq.dfTrans(0,int(self.trans[2]),int(self.trans[4])) # hyperfinesplitting, independent of B
         self.rH_freq = -109e6 # frequency of Rh, is -1st order
         
         # range of sensible frequencies for rPara and rV        
-        self.rParaRange = [170,220]*1e6
-        self.rVRange = [105,113]*1e6
+        self.rParaRange = [170e6,220e6]
+        self.rVRange = [105e6,113e6]
     
 
     def setProfile(self, channel, profile, freq, phase=0.0, amp=1.0, addQubitFreq = True):
-    ''' channnel: rPara or rV, profile: 0...7, if addQubitFreq=True: the lasers used to create the frequency difference are split by 3.2GHz '''
+        ''' channnel: rPara or rV, profile: 0...7, if addQubitFreq=True: the lasers used to create the frequency difference are split by 3.2GHz '''
         if addQubitFreq:
             freqDDS = fself.msDiff-self.rH_freq-freq
         else:

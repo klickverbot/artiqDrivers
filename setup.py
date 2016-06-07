@@ -21,7 +21,9 @@ setup(name='artiqDrivers',
               'artiqDrivers.devices.rohdeSynth',
               'artiqDrivers.devices.thorlabs_mdt69xb',
               'artiqDrivers.devices.trapDac',
-              'artiqDrivers.devices.tti_ql355'
+              'artiqDrivers.devices.tti_ql355',
+              'artiqDrivers.profileSwitcher',
+              'artiqDrivers.profileSwitcher.profileSwitcher'
              ],
     entry_points={
         "console_scripts": scripts,

@@ -49,6 +49,7 @@ class CoherentDds:
         self.setProfileWords(channel, profile, freqWord, phaseWord, ampWord)
     
     def setProfileWords(self, channel, profile, freq, phase, amp): # Freq, phase, amp are all in units of lsb
+        profile = int(profile) # have to do this, because artiq uses a special artiq.integer
         if channel < 0 or channel > 3 or not isinstance(channel, int):
             raise ValueError("DDS channel should be an integer between 0 and 3")
         if profile < 0 or profile > 7 or not isinstance(profile, int):

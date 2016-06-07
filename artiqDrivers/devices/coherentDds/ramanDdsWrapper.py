@@ -16,36 +16,36 @@ class RamanDdsWrapper:
         self.msDiff = 3.2e9 # master-slave Raman laser frequency difference
         self.trans = ['t4030'] # hyperfine transition without Zeeman shift
         self.hfs = self.hfq.dfTrans(0,int(self.trans[2]),self.int(trans[4])) # hyperfinesplitting, independent of B
-        self.Rh_freq = -109e6 # frequency of Rh, is -1st order
+        self.rH_freq = -109e6 # frequency of Rh, is -1st order
         
-        # range of sensible frequencies for Rpara and Rv        
-        self.RparaRange = [170,220]*1e6
-        self.RvRange = [105,113]*1e6
+        # range of sensible frequencies for rPara and rV        
+        self.rParaRange = [170,220]*1e6
+        self.rVRange = [105,113]*1e6
     
 
     def setProfile(self, channel, profile, freq, phase=0.0, amp=1.0, addQubitFreq = True):
-    ''' channnel: Rpara or Rv, profile: 0...7, if addQubitFreq=True: the lasers used to create the frequency difference are split by 3.2GHz '''
+    ''' channnel: rPara or rV, profile: 0...7, if addQubitFreq=True: the lasers used to create the frequency difference are split by 3.2GHz '''
         if addQubitFreq:
-            freqDDS = fself.msDiff-self.Rh_freq-freq
+            freqDDS = fself.msDiff-self.rH_freq-freq
         else:
-            freqDDS = freq - self.Rh_freq
+            freqDDS = freq - self.rH_freq
         
-        if channel == Rpara:
-            # Rpara is double passed +1,+1
+        if channel == rPara:
+            # rPara is double passed +1,+1
             freqDDS /= 2
             phase /= 2
-            if (freqDDS<self.RparaRange[0]) or (freqDDS>self.RparaRange[1]):
-                raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.RparaRange[0]/1e6,self.RparaRange[1]/1e6))
+            if (freqDDS<self.rParaRange[0]) or (freqDDS>self.rParaRange[1]):
+                raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rParaRange[0]/1e6,self.rParaRange[1]/1e6))
             else:
                 self.dds.setProfile(channel, profile, freqDDS, phase=phase, amp=amp)
             
-        elif channel == Rv:
-            # Rv is -1st order  
+        elif channel == rV:
+            # rV is -1st order  
             freqDDS *= -1     
-            if (freqDDS<self.RparaRange[0]) or (freqDDS>self.RparaRange[1]):
-                raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.RparaRange[0]/1e6,self.RparaRange[1]/1e6))
+            if (freqDDS<self.rVRange[0]) or (freqDDS>self.rVRange[1]):
+                raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rVRange[0]/1e6,self.rVRange[1]/1e6))
             else:
                 self.dds.setProfile(channel, profile, freqDDS, phase=phase, amp=amp)
             
         else:
-            raise ValueError("Channel can only be Rpara or Rv")
+            raise ValueError("Channel can only be rPara or rV")

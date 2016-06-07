@@ -38,6 +38,7 @@ class CoherentDds:
     def setProfile(self, channel, profile, freq, phase=0.0, amp=1.0):
         """Sets a DDS profile frequency (Hz), phase (degrees), and amplitude (full-scale).
         phase defaults to 0 and amplitude defaults to 1"""
+        print('freq:',freq)
         if amp < 0 or amp > 1:
             raise ValueError("DDS amplitude must be between 0 and 1")
         if freq < 0 or freq > 450e6: # This should be dependant on the clock frequency
@@ -46,10 +47,12 @@ class CoherentDds:
         ampWord = int(round( amp * 0x3fff ))
         phaseWord = int(round( (phase % 360) / 360.0 * 0xffff ))
         freqWord = int(round( freq / self.lsbFreq ))
+        print('freqWord:',freqWord)
         self.setProfileWords(channel, profile, freqWord, phaseWord, ampWord)
     
     def setProfileWords(self, channel, profile, freq, phase, amp): # Freq, phase, amp are all in units of lsb
         profile = int(profile) # have to do this, because artiq uses a special artiq.integer
+        print('Profile:',profile)
         if channel < 0 or channel > 3 or not isinstance(channel, int):
             raise ValueError("DDS channel should be an integer between 0 and 3")
         if profile < 0 or profile > 7 or not isinstance(profile, int):

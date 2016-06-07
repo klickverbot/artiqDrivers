@@ -19,26 +19,25 @@ class RamanDdsWrapper:
         self.rH_freq = -109e6 # frequency of Rh, is -1st order
         
         # range of sensible frequencies for rPara and rV        
-        self.rParaRange = [170e6,220e6]
+        self.rParaRange = [70e6,120e6]
         self.rVRange = [105e6,113e6]
     
 
     def setProfile(self, channel, profile, freq, phase=0.0, amp=1.0, addQubitFreq = True):
         ''' channnel: rPara or rV, profile: 0...7, if addQubitFreq=True: the lasers used to create the frequency difference are split by 3.2GHz '''
         if addQubitFreq:
-            freqDDS = self.msDiff-self.rH_freq-freq
+            freqDDS = self.msDiff+self.rH_freq-freq
         else:
             freqDDS = freq - self.rH_freq
         
         if channel == 'rPara':
             # rPara is double passed +1,+1
             freqDDS /= 2
+            print(freqDDS)
             phase /= 2
             if (freqDDS<self.rParaRange[0]) or (freqDDS>self.rParaRange[1]):
                 raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rParaRange[0]/1e6,self.rParaRange[1]/1e6))
             else:
-                print('Profile:',profile)
-                print(type(profile))
                 self.dds.setProfile(0, profile, freqDDS, phase=phase, amp=amp)
             
         elif channel == 'rV':

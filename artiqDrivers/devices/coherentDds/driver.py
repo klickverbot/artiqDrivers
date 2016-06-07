@@ -53,8 +53,6 @@ class CoherentDds:
         if channel < 0 or channel > 3 or not isinstance(channel, int):
             raise ValueError("DDS channel should be an integer between 0 and 3")
         if profile < 0 or profile > 7 or not isinstance(profile, int):
-            print('Profile:',profile)
-            print(type(profile))
             raise ValueError("DDS profile should be an integer between 0 and 7")
         if amp > 0x3fff or amp < 0 or not isinstance(amp, int):
             raise ValueError("DDS amplitude word should be an integer between 0 and 0x3fff")

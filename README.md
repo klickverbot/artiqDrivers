@@ -8,3 +8,4 @@ Ports:
 - rhodeSynth_controller : 4004
 - trapDac_controller : 4005
 - tti_ql355_controller : 4006
+- bmePulsePicker_timing_controller : 4007

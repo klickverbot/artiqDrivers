@@ -33,7 +33,6 @@ class RamanDdsWrapper:
         if channel == 'rPara':
             # rPara is double passed +1,+1
             freqDDS /= 2
-            print(freqDDS)
             phase /= 2
             if (freqDDS<self.rParaRange[0]) or (freqDDS>self.rParaRange[1]):
                 raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rParaRange[0]/1e6,self.rParaRange[1]/1e6))

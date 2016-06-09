@@ -50,3 +50,5 @@ class RamanDdsWrapper:
             
         else:
             raise ValueError("Channel can only be rPara or rV")
+            
+        self.dds.resetPhase()

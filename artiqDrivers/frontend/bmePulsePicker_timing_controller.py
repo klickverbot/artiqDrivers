@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from artiqDrivers.devices.bmePulsePicker.bme_delay_gen import Driver
+from artiqDrivers.devices.bmePulsePicker.bme_delay_gen import ClockSource, Driver
 from artiqDrivers.devices.bmePulsePicker.timing import PulsePickerTiming
 from artiq.protocols.pc_rpc import simple_server_loop
 from artiq.tools import verbosity_args, simple_network_args, init_logger
@@ -26,6 +26,7 @@ def main():
     delay_gen = None
     if not args.simulation:
         delay_gen = Driver().init_single_pci_card()
+        delay_gen.set_clock_source(ClockSource.external_80_mhz)
 
     timing = PulsePickerTiming(delay_gen, args.allow_long_pulses)
     simple_server_loop({"timing": timing}, args.bind, args.port)

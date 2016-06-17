@@ -3,8 +3,8 @@
 import argparse
 import sys
 
-from artiqDrivers.devices.bmePulsePicker.bme_delay_gen import ClockSource, Driver
-from artiqDrivers.devices.bmePulsePicker.timing import PulsePickerTiming
+from artiqDrivers.devices.bme_pulse_picker.bme_delay_gen import ClockSource, Driver
+from artiqDrivers.devices.bme_pulse_picker.timing import PulsePickerTiming
 from artiq.protocols.pc_rpc import simple_server_loop
 from artiq.tools import verbosity_args, simple_network_args, init_logger
 

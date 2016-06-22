@@ -63,8 +63,15 @@ class StatusFlag(Enum):
     interlock_16 = 0x10000
     current_ratio_error = 0x20000
     current_ratio_checking_active = 0x100000
+
+    #: Error checking is inhibited by connecting internal jumper (pins 3 and 4
+    #: on quadratic 4-pin header in the left/centre of the main PCB). Allows
+    #: enabling high voltage without driver head connected.
     inhibit_error = 0x200000
+
+    #: This seems to be set all the time in I2C mode.
     pc_board_remote = 0x400000
+
     failure = 0x4000000
     hv_on = 0x8000000
 
@@ -103,10 +110,8 @@ def describe_status_flag(flag: StatusFlag):
     if flag == StatusFlag.current_ratio_checking_active:
         return "Current ratio checking active"
     if flag == StatusFlag.inhibit_error:
-        # Unclear what this actually means.
-        return "Inhibit error"
+        return "Error checking inhibited"
     if flag == StatusFlag.pc_board_remote:
-        # This seems to be set all the time in I2C mode.
         return "PCB remote active"
     if flag == StatusFlag.failure:
         # Unclear what this actually means - equivalent to the generic

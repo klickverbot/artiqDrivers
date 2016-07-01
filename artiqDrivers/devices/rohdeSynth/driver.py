@@ -89,6 +89,7 @@ class RohdeSynth:
         return self.query("*IDN?\n")
 
     def ping(self):
+        self.identity()
         return True
 
 

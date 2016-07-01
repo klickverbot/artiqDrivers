@@ -1,3 +1,4 @@
+"""Control a BME delay generator PCI cards using the vendor driver DLL."""
 from ctypes import byref, cdll, c_bool, c_double, c_long, c_ulong
 from enum import Enum, unique
 
@@ -49,7 +50,10 @@ class Driver:
     Interface to the driver DLL for the delay generator PCI cards by BME
     (Bergmann Messgeräte Entwicklung KG).
 
-    There should typically only be one instace of this class per process.
+    There should typically only be one instance of this class per process. Note
+    also that the class does not currently uninitialise and unload the DLL upon
+    destruction (although that would be easily fixable), so creating many objects
+    would eventually deplete the process handle pool.
     """
     def __init__(self):
         try:
@@ -127,6 +131,17 @@ class Driver:
 
 
 @unique
+class ClockSource(Enum):
+    """The main clock for the delay generator card to use."""
+
+    #: Use the on-board 160 MHz oscillator.
+    internal = 0,
+
+    #: Use an external 80 MHz clock fed to the trigger input.
+    external_80_mhz = 1,
+
+
+@unique
 class OutputGateMode(Enum):
     """Modes for the delay generator to combine pairs of adjacient channels
     instead of directly routing them to the respective outputs."""
@@ -169,6 +184,13 @@ class BME_SG08p:
 
     CHANNEL_COUNT = 6
 
+    # By default, the delay generator card is configured to use a 10 MHz clock
+    # derived from the internal oscillator. The manufacturer suggested using a
+    # higher clock rate for our application to cut down on various internal
+    # delays, 40 MHz. However, the timing values are not automatically rescaled
+    # by the driver, so we need to manually stretch them.
+    CLOCK_FACTOR = 4
+
     def __init__(self, driver_lib, device_idx):
         self._lib = driver_lib
         self._device_idx = device_idx
@@ -200,14 +222,7 @@ class BME_SG08p:
         # Set the default hardware configuration. This is application-specific
         # and should be made configurable for a proper, comprehensive driver.
 
-        self._lib.set_g08_clock_parameters(
-            True, # Enable clock circuit
-            16, # Internal oscillator divider (16 is default in software)
-            1, # Trigger input divider
-            1, # Trigger input multiplier
-            1, # Use internal oscillator as clock (1: crystal, 2: trigger in,
-               # 3: trigger in with crystal as fallback, 4: master/slave bus)
-            self._device_idx)
+        self._set_clock_params(ClockSource.internal)
 
         # Default to external gating and no inhibit time.
         self._set_trigger_params(True, 0.0)
@@ -225,7 +240,7 @@ class BME_SG08p:
                # triggering.
             0xfc, # Default flags from manual UI (send local primary/force,
                   # resync pre-scaled m/s clock to input, send step-back/start/
-                  # inhibit/load-data).
+                  # inhibit/load-data)
             self._device_idx)
 
         # All "straight" delay channels, no combining.
@@ -237,6 +252,28 @@ class BME_SG08p:
 
         self._lib.activate_dg(self._device_idx)
 
+    def set_clock_source(self, source):
+        self._lib.deactivate_dg(self._device_idx)
+        self._set_clock_params(source)
+        self._lib.activate_dg(self._device_idx)
+
+    def _set_clock_params(self, source: ClockSource):
+        if source == ClockSource.internal:
+            s = 1
+        elif source == ClockSource.external_80_mhz:
+            s = 2
+        else:
+            raise DelayGenException("Unrecognised clock source")
+
+        self._lib.set_g08_clock_parameters(
+            True, # Enable clock circuit
+            4,    # Internal oscillator divider (160 MHz base frequency)
+            2,    # Trigger input divider
+            1,    # Trigger input multiplier
+            s,   # 1: crystal, 2: trigger in, 3: trigger in with crystal as
+                  # fallback, 4: master/slave bus)
+            self._device_idx)
+
     def set_trigger(self, use_external_gate, inhibit_us):
         self._lib.deactivate_dg(self._device_idx)
         self._set_trigger_params(use_external_gate, inhibit_us)
@@ -245,19 +282,19 @@ class BME_SG08p:
     def _set_trigger_params(self, use_external_gate, inhibit_us):
         self._lib.set_trigger_parameters(
             True, # 50 Ω-terminate trigger input
-            inhibit_us, # Inhibit time
-            1.0, # Trigger level ([-2.5, 2.5] V)
+            inhibit_us * self.CLOCK_FACTOR, # Inhibit time
+            0.0, # Trigger level ([-2.5, 2.5] V)
             0, # Pre-set trigger counter limit (disabled below)
             1, # Gate divider, 0 for level-sensitive gate
             True, # Trigger on positive external gate edge
-            False, # No internal trigger
+            True, # Use internal trigger
             False, # No arming based on internal clock
             False, # No software trigger
-            True, # Trigger on rising edge of external input
+            False, # Do not use external trigger (used for clock input)
             False, # Do not stop when pre-set counter value is reached
             True, # Reset all outputs 2 μs after all delays have elapsed
             not use_external_gate, # Whether to always enable trigger regardless
-                                # of the gate signal
+                                   # of the gate signal
             self._device_idx)
 
     def set_output_gates(self, modes):
@@ -302,8 +339,8 @@ class BME_SG08p:
         CHANNEL_A_IDX = 2
         self._lib.set_g08_delay(
             CHANNEL_A_IDX + idx, # Channel index
-            params.delay_us, # Time to first edge, in μs
-            params.width_us, # Pulse width (first to second edge), in μs
+            params.delay_us * self.CLOCK_FACTOR, # Time to first edge, in μs
+            params.width_us * self.CLOCK_FACTOR, # Pulse width (first to second edge), in μs
             1, # Modulo counter length
             0, # Modulo counter offset
             0x1 if params.enabled else 0x0, # Trigger from local primary if enabled

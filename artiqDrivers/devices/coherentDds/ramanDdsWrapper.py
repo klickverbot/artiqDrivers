@@ -15,7 +15,7 @@ class RamanDdsWrapper:
         
         self.msDiff = 3.2e9 # master-slave Raman laser frequency difference
         self.trans = 't4030' # hyperfine transition without Zeeman shift
-        self.hfs = self.hfq.dfTrans(0,int(self.trans[2]),int(self.trans[4])) # hyperfinesplitting, independent of B
+        self.hfs = self.hfq.df_trans(B=0,mF4=int(self.trans[2]),mF3=int(self.trans[4])) # hyperfinesplitting, independent of B
         self.rH_freq = -109e6 # frequency of Rh, is -1st order
         
         # range of sensible frequencies for rPara and rV        

@@ -99,7 +99,7 @@ class RamanDdsWrapperWobble(RamanDdsWrapperBase):
         self.dds.resetPhase()
         
 class RamanDdsWrapperMS(RamanDdsWrapperBase):
-    """For Molmer Sorensen gate measurements, incl high field SBC"""
+    """For Molmer Sorensen gate measurements, incl high field SBC, Rv is actually Rh2"""
     def __init__(self, dmgr, device):
         """LO_freq : blue beat note frequency between master and slave laser"""
         

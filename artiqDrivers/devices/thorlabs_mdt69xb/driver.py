@@ -20,10 +20,10 @@ class PiezoController:
                 baudrate=115200,
                 timeout=0.1,
                 write_timeout=0.1)
-            self._purge()
 
         self.echo = None
-        self._set_echo(False)
+        self._purge()
+        self._set_echo(False, verify=False)
         self.vLimit = self.get_voltage_limit()
         logger.info("Device vlimit is {}".format(self.vLimit))
 
@@ -34,12 +34,7 @@ class PiezoController:
     def _purge(self):
         """Make sure we start from a clean slate with the controller"""
         if not self.simulation:
-            # Send a carriage return to clear the controller's input buffer
-            self.port.write('\r'.encode())
-            # Read any old gibberish from input until a timeout occurs
-            c = 'c'
-            while c != '':
-                c = self.port.read().decode()
+            self._send_command("", verify=False)
             logger.info("Clean slate established")
 
     def _load_setpoints(self):
@@ -60,7 +55,7 @@ class PiezoController:
         if not self.simulation:
             self.port.close()
 
-    def _send_command(self, cmd):
+    def _send_command(self, cmd, verify=True):
         if self.simulation:
             print(cmd)
             return None
@@ -76,11 +71,21 @@ class PiezoController:
             if self.echo:
                 # Read off the echoed command to stay in sync
                 _ = self._read_line()
+
+            if verify:
+                self._read_asterisk(cmd)
             else:
-                # Read off the asterisk
-                c = self.port.read().decode()
-                if c != '*':
-                    logger.error('"{}" returned unexpected character "{}"'.format(cmd, c))
+                self.port.reset_input_buffer()
+
+    def _read_asterisk(self, cmd):
+        """Read a single character after a command and check success"""
+        c = self.port.read().decode()
+        if c = '*':
+            logger.debug('Command "{}" successful'.format(cmd))
+        elif c = '!':
+            logger.error('Command "{}" failed'.format(cmd))
+        else:
+            logger.error('Command "{}" unexpectedly returned "{}"'.format(cmd, c))
 
     def _read_line(self):
         """Read a CR terminated line. Returns '' on timeout"""
@@ -93,31 +98,30 @@ class PiezoController:
         return s
 
     def _read_bracketed(self):
-        """Reads until a string enclosed in square brackets is found, and
-        returns it."""
+        """Read a line with string enclosed in square brackets and return string"""
         line = self._read_line()
-        while line != '':
-            match = re.search("\[(.*)\]", line)
-            if match:
-                return match.group(1)
-            line = self._read_line()
-        raise IOError("Timeout while reading bracketed string")
+        match = re.search("\[(.*)\]", line)
+        if match:
+            return match.group(1)
+        raise ParseError('Bracketed string not found in "{}"'.format(line))
 
     def _get_echo(self):
         """Get echo mode of controller"""
-        # Made private since it is of no use to RPC clients
         self._send_command("echo?")
         self.echo = self._read_bracketed() == "Echo On"
         return self.echo
 
-    def _set_echo(self, enable):
+    def _set_echo(self, enable, verify=True):
         """Set echo mode of controller"""
-        # Made private since it is of no use to RPC clients
-        self._send_command("echo={}".format(1 if enable else 0))
-        self.echo = self._read_bracketed() == "Echo On"
-        # NB this command is awful, in that it always elicits a response
-        # of *[Echo On] or *[Echo Off] regardless, unlike all other set
+        # NB "echo=" command is awful, in that it always elicits a response
+        # of *[Echo On]\r* or *[Echo Off]\r* regardless, unlike all other set
         # commands which just set the value quietly
+        self._send_command("echo={}".format(1 if enable else 0), verify)
+        if verify:
+            self.echo = self._read_bracketed() == "Echo On"
+            self._read_asterisk("echo")
+        else:
+            self.echo = enable
 
     def get_serial(self):
         """Returns the device serial string."""
@@ -185,3 +189,6 @@ class PiezoController:
     def ping(self):
         self.get_voltage_limit()
         return True
+
+class ParseError(Exception):
+    pass

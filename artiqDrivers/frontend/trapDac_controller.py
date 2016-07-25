@@ -14,9 +14,6 @@ def get_argparser():
                         help="Trap DC Dac serial device")
     parser.add_argument("--trapRFDevice", default=None,
                         help="Trap RF serial device")    
-    parser.add_argument("--simulation", action="store_true",
-                        help="Put the driver in simulation mode, even if "
-                             "--device is used.")
     
     simple_network_args(parser, 4005)
     verbosity_args(parser)
@@ -32,10 +29,7 @@ def main():
               "arguments. Use --help for more information.")
         sys.exit(1)
 
-    if args.simulation:
-        dev = TrapDacSim()
-    else:
-        dev = TrapDac(addrDCInterface=args.trapDacDevice, addrRFInterface=args.trapRFDevice)
+    dev = TrapDac(addr_dc_iface=args.trapDacDevice, addr_rf_iface=args.trapRFDevice)
         
     simple_server_loop({"trapDac": dev}, args.bind, args.port)
 

@@ -80,12 +80,12 @@ class PiezoController:
     def _read_asterisk(self, cmd):
         """Read a single character after a command and check success"""
         c = self.port.read().decode()
-        if c = '*':
+        if c == '*':
             logger.debug('Command "{}" successful'.format(cmd))
-        elif c = '!':
-            logger.error('Command "{}" failed'.format(cmd))
+        elif c == '!':
+            raise ControllerError('Command "{}" failed'.format(cmd))
         else:
-            logger.error('Command "{}" unexpectedly returned "{}"'.format(cmd, c))
+            raise ControllerError('Command "{}" failed, unexpectedly returned "{}"'.format(cmd, c))
 
     def _read_line(self):
         """Read a CR terminated line. Returns '' on timeout"""
@@ -191,4 +191,7 @@ class PiezoController:
         return True
 
 class ParseError(Exception):
-    pass
+    """Raised when controller output cannot be parse as expected"""
+
+class ControllerError(Exception):
+    """Raised when commands are not accepted by the controller"""

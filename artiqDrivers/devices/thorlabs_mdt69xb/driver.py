@@ -34,8 +34,19 @@ class PiezoController:
     def _purge(self):
         """Make sure we start from a clean slate with the controller"""
         if not self.simulation:
-            self._send_command("", verify=False)
-            logger.info("Clean slate established")
+            self._send("")
+            c = self.port.read().decode()
+            self.port.reset_input_buffer()
+            if c == '!' and self.port.in_waiting == 0:
+               logger.debug("Clean slate established")
+            else:
+                raise ControllerError("Purge failed")
+
+    def _reset_input(self):
+        # Reset input buffer method of port is fine so long as the data has
+        # actually been sent back - wait for at least one character
+        _ = self.port.read().decode()
+        self.port.reset_input_buffer()
 
     def _load_setpoints(self):
         """Load setpoints from a file"""
@@ -55,37 +66,39 @@ class PiezoController:
         if not self.simulation:
             self.port.close()
 
-    def _send_command(self, cmd, verify=True):
+    def _send_command(self, cmd):
         if self.simulation:
             print(cmd)
             return None
         else:
-            try:
-                self.port.write((cmd+'\r').encode())
-            except serial.SerialTimeoutException as e:
-                logger.exception("Serial write timeout: Force exit")
-                # This is hacky but makes the server exit
-                asyncio.get_event_loop().call_soon(sys.exit, 42)
-                raise
+            self._send(cmd)
 
             if self.echo:
                 # Read off the echoed command to stay in sync
-                _ = self._read_line()
-
-            if verify:
-                self._read_asterisk(cmd)
-            else:
-                self.port.reset_input_buffer()
+                l = self._read_line()
+                logger.debug("Controller echoed '{}'".format(l))
+            self._read_asterisk(cmd)
 
     def _read_asterisk(self, cmd):
         """Read a single character after a command and check success"""
         c = self.port.read().decode()
         if c == '*':
-            logger.debug('Command "{}" successful'.format(cmd))
+            logger.debug("Command '{}' successful".format(cmd))
         elif c == '!':
-            raise ControllerError('Command "{}" failed'.format(cmd))
+            raise ControllerError("Command '{}' failed".format(cmd))
         else:
-            raise ControllerError('Command "{}" failed, unexpectedly returned "{}"'.format(cmd, c))
+            raise ControllerError("Command '{}' failed, unexpectedly returned '{}'".format(cmd, c))
+
+    def _send(self, cmd):
+        """Wrapper for send that will exit server if error occurs"""
+        try:
+            self.port.write((cmd+'\r').encode())
+            logger.debug("Sending '{}'".format(cmd))
+        except serial.SerialTimeoutException as e:
+            logger.exception("Serial write timeout: Force exit")
+            # This is hacky but makes the server exit
+            asyncio.get_event_loop().call_soon(sys.exit, 42)
+            raise
 
     def _read_line(self):
         """Read a CR terminated line. Returns '' on timeout"""
@@ -103,7 +116,7 @@ class PiezoController:
         match = re.search("\[(.*)\]", line)
         if match:
             return match.group(1)
-        raise ParseError('Bracketed string not found in "{}"'.format(line))
+        raise ParseError("Bracketed string not found in '{}'".format(line))
 
     def _get_echo(self):
         """Get echo mode of controller"""
@@ -116,11 +129,13 @@ class PiezoController:
         # NB "echo=" command is awful, in that it always elicits a response
         # of *[Echo On]\r* or *[Echo Off]\r* regardless, unlike all other set
         # commands which just set the value quietly
-        self._send_command("echo={}".format(1 if enable else 0), verify)
         if verify:
+            self._send_command("echo={}".format(1 if enable else 0))
             self.echo = self._read_bracketed() == "Echo On"
             self._read_asterisk("echo")
         else:
+            self._send("echo={}".format(1 if enable else 0))
+            self._reset_input()
             self.echo = enable
 
     def get_serial(self):
@@ -191,7 +206,7 @@ class PiezoController:
         return True
 
 class ParseError(Exception):
-    """Raised when controller output cannot be parse as expected"""
+    """Raised when controller output cannot be parsed as expected"""
 
 class ControllerError(Exception):
     """Raised when commands are not accepted by the controller"""

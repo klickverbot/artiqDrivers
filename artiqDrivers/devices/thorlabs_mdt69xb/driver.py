@@ -35,18 +35,18 @@ class PiezoController:
         """Make sure we start from a clean slate with the controller"""
         if not self.simulation:
             self._send("")
+            self._reset_input()
+            self._send("")
             c = self.port.read().decode()
-            self.port.reset_input_buffer()
-            if c == '!' and self.port.in_waiting == 0:
-               logger.debug("Clean slate established")
+            if c == '!':
+                logger.debug("Clean slate established")
             else:
                 raise ControllerError("Purge failed")
 
     def _reset_input(self):
-        # Reset input buffer method of port is fine so long as the data has
-        # actually been sent back - wait for at least one character
         _ = self.port.read().decode()
-        self.port.reset_input_buffer()
+        while _ != '':
+            _ = self.port.read().decode()
 
     def _load_setpoints(self):
         """Load setpoints from a file"""
@@ -71,6 +71,7 @@ class PiezoController:
             print(cmd)
             return None
         else:
+            logger.debug("Sending '{}'".format(cmd))
             self._send(cmd)
 
             if self.echo:
@@ -93,7 +94,6 @@ class PiezoController:
         """Wrapper for send that will exit server if error occurs"""
         try:
             self.port.write((cmd+'\r').encode())
-            logger.debug("Sending '{}'".format(cmd))
         except serial.SerialTimeoutException as e:
             logger.exception("Serial write timeout: Force exit")
             # This is hacky but makes the server exit

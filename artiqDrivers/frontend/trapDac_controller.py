@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from artiqDrivers.devices.trapDac.driver import TrapDac, TrapDacSim
+from artiqDrivers.devices.trapDac.driver import TrapDac
 from artiq.protocols.pc_rpc import simple_server_loop
 from artiq.tools import verbosity_args, simple_network_args, init_logger
 
@@ -24,8 +24,8 @@ def main():
     args = get_argparser().parse_args()
     init_logger(args)
 
-    if not args.simulation and (args.trapDacDevice is None or args.trapRFDevice is None):
-        print("You need to specify either --simulation or --trapDacDevice and --trapRFDevice"
+    if args.trapDacDevice is None or args.trapRFDevice is None:
+        print("You need to specify --trapDacDevice and --trapRFDevice"
               "arguments. Use --help for more information.")
         sys.exit(1)
 

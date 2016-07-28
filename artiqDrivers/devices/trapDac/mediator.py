@@ -27,7 +27,7 @@ class TrapDacWrapper:
                     far_comp = self.traps[trap_name][2],
                     near_comp = self.traps[trap_name][3],
                     bottom_comp = self.traps[trap_name][4],
-                    rf_level = self.traps[trap_name][5]])
+                    rf_level = self.traps[trap_name][5])
 
     def set_trap(self, near_ec=None, far_ec=None, far_comp=None, near_comp=None, bottom_comp=None, rf_level=None):
         """Set the DC voltages and RF power to given values.

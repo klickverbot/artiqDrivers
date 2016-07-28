@@ -20,7 +20,7 @@ class TrapDac:
 
     def set_dc(self, dc_vec):
         """Set all 5 dc channels simultaneously"""
-        self.dc_iface.set_all_dac_channels(*dec_vec)
+        self.dc_iface.set_all_dac_channels(*dc_vec)
 
     def ping(self):
         return True

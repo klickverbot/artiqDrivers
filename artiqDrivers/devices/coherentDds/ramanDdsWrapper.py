@@ -23,7 +23,7 @@ class RamanDdsWrapper(RamanDdsWrapperBase):
     """For high-field SBC and phase noise measurements"""
     def __init__(self, dmgr, device):
         """LO_freq : blue beat note frequency between master and slave laser"""
-        
+        RamanDdsWrapperBase.__init__(self, dmgr, device)
         # range of sensible frequencies for rPara and rV        
         self.rParaRange = [70e6,120e6]
         self.rVRange = [105e6,113e6]
@@ -62,7 +62,7 @@ class RamanDdsWrapperWobble(RamanDdsWrapperBase):
     """For wobble and fast gates measurements, incl high field SBC"""
     def __init__(self, dmgr, device):
         """LO_freq : blue beat note frequency between master and slave laser"""
-        
+        RamanDdsWrapperBase.__init__(self, dmgr, device)
         # range of sensible frequencies for rPara and rV        
         self.rParaRange = [70e6,120e6]
         self.rVRange = [214e6,216e6]
@@ -102,7 +102,7 @@ class RamanDdsWrapperMS(RamanDdsWrapperBase):
     """For Molmer Sorensen gate measurements, incl high field SBC, Rv is actually Rh2"""
     def __init__(self, dmgr, device):
         """LO_freq : blue beat note frequency between master and slave laser"""
-        
+        RamanDdsWrapperBase.__init__(self, dmgr, device)
         # range of sensible frequencies for rPara and rV        
         self.rParaRange = [70e6,120e6]
         self.rVRange = [214e6,216e6]

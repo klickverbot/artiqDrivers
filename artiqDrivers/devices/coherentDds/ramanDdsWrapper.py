@@ -19,7 +19,7 @@ class RamanDdsWrapperBase:
         self.rH_freq = -109e6 # frequency of Rh, is -1st order
     
 
-class RamanDdsWrapper(RamanDdsWrapperBase):
+class RamanDdsWrapperPhaseNoise(RamanDdsWrapperBase):
     """For high-field SBC and phase noise measurements"""
     def __init__(self, dmgr, device):
         """LO_freq : blue beat note frequency between master and slave laser"""
@@ -58,7 +58,7 @@ class RamanDdsWrapper(RamanDdsWrapperBase):
             
         self.dds.resetPhase()
         
-class RamanDdsWrapperWobble(RamanDdsWrapperBase):
+class RamanDdsWrapper(RamanDdsWrapperBase):
     """For wobble and fast gates measurements, incl high field SBC"""
     def __init__(self, dmgr, device):
         """LO_freq : blue beat note frequency between master and slave laser"""

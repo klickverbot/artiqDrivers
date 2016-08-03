@@ -12,9 +12,7 @@ class TrapDacWrapper:
 
     def __init__(self, dmgr, device, traps):
         self.device = dmgr.get(device)
-        
-        self.old_dc_vec = [0]*5
-        self.old_rf = -15
+
         self.traps = traps
 
     def set_named_trap(self, trap_name):
@@ -34,15 +32,18 @@ class TrapDacWrapper:
         Any unsupplied values are left unchanged."""
 
         dc_vec = [near_ec, far_ec, far_comp, bottom_comp, near_comp]
+        old_dc_vec = self.device.get_dc()
+        old_rf = self.device.get_rf_level()
 
         # If any voltages need to be changed ...
         if not all(v is None for v in dc_vec ):
             for i, v in enumerate(dc_vec):
                 if v is None:
-                    dc_vec[i] = self.old_dc_vec[i]
-            self.set_dc(dc_vec)
+                    dc_vec[i] = old_dc_vec[i]
+            self.device.set_dc(dc_vec)
+            print(dc_vec)
             self.old_dc_vec = dc_vec
 
         if rf_level is not None:
-            self.set_rf_level(rf_level)
-            self.old_rf = rf_level
+            self.device.set_rf_level(rf_level)
+            old_rf = rf_level

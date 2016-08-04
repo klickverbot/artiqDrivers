@@ -65,7 +65,7 @@ class RamanDdsWrapper(RamanDdsWrapperBase):
         RamanDdsWrapperBase.__init__(self, dmgr, device)
         # range of sensible frequencies for rPara and rV        
         self.rParaRange = [70e6,120e6]
-        self.rVRange = [214e6,216e6]
+        self.rVRange = [213e6,217e6]
     
 
     def setProfile(self, channel, profile, freq, phase=0.0, amp=1.0, addQubitFreq = True):

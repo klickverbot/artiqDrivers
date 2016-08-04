@@ -87,15 +87,31 @@ class CoherentDds:
                 self.send(',');
         self.send('\n');
 
-    #def setSensiblePulseShape(self, duration):
-    #    """Sets a sensible looking pulse shape with total duration 'duration' seconds. The duration must be between 0 and 10us"""
-    #    if duration > 10e-6 or duration < 0:
-    #        raise ValueError("DDS pulse shape duration must be between 0 and 10us")
-    #    
+    def setSensiblePulseShape(self, duration, shapeChannel=0):
+        """Sets a sensible looking pulse shape with total duration 'duration' seconds. The duration must be between 0 and 10us"""
+        if duration > 10e-6 or duration < 0.2e-6:
+            raise ValueError("DDS pulse shape duration must be between 0.2us and 10us")
+                
+        shapeVec = []
+        i_max = round(duration*200e6)
+        for i in range(i_max):
+            y = 0.209*math.log10( (math.sin((1+i)/float(i_max+1)*math.pi/2))**4 ) + 1
+            if y < 0:
+                y = 0
+            shapeVec.append(y)
+        self.setPulseShape(shapeChannel, shapeVec)
 
     def ping(self):
         return True
 
+  iMax = (int)( duration * 200.0 );
+  
+  for(i=0;i<iMax;i++) { 
+    shape[i] = 
+    if(shape[i]<0) shape[i]=0;
+  }
+
+  setPulseShape( shape, iMax);
 
 
 

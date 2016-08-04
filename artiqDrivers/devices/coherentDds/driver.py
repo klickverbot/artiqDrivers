@@ -104,16 +104,6 @@ class CoherentDds:
     def ping(self):
         return True
 
-  iMax = (int)( duration * 200.0 );
-  
-  for(i=0;i<iMax;i++) { 
-    shape[i] = 
-    if(shape[i]<0) shape[i]=0;
-  }
-
-  setPulseShape( shape, iMax);
-
-
 
 class CoherentDdsSim:
     def __init__(self):

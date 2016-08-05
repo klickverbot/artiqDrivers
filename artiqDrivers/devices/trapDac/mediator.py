@@ -1,5 +1,5 @@
 from artiq.language.core import *
-
+import time
 
 class TrapDacWrapper:
     """
@@ -35,15 +35,33 @@ class TrapDacWrapper:
         old_dc_vec = self.device.get_dc()
         old_rf = self.device.get_rf_level()
 
-        # If any voltages need to be changed ...
-        if not all(v is None for v in dc_vec ):
-            for i, v in enumerate(dc_vec):
-                if v is None:
-                    dc_vec[i] = old_dc_vec[i]
-            self.device.set_dc(dc_vec)
-            print(dc_vec)
-            self.old_dc_vec = dc_vec
+        av_ec = mean([near_ec, far_ec])
+        av_ec_old = mean(old_dc_vec[0:2])
+        if av_ec > av_ec_old:
+            ec_increasing=True
+        else:
+            ec_increasing=False
 
-        if rf_level is not None:
-            self.device.set_rf_level(rf_level)
-            old_rf = rf_level
+        def set_rf():
+            if rf_level is not None:
+                self.device.set_rf_level(rf_level)
+                old_rf = rf_level
+        
+        def set_dc():
+            # If any voltages need to be changed ...
+            if not all(v is None for v in dc_vec ):
+                for i, v in enumerate(dc_vec):
+                    if v is None:
+                        dc_vec[i] = old_dc_vec[i]
+                self.device.set_dc(dc_vec)
+                print(dc_vec)
+                self.old_dc_vec = dc_vec
+
+        if ec_increasing:
+            set_rf()
+            set_dc()
+        else:
+            set_dc()
+            if rf_level is not None:
+                time.sleep(200e-3)
+                set_rf()

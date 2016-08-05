@@ -13,14 +13,27 @@ class TrapDac:
         self.dc_iface = OldlabDCInterface(addr_dc_iface)
         self.rf_iface = OldlabRFAttenuatorInterface(addr_rf_iface)
 
+        self.rf_level = -14
+        self.dc_vec = [0]*5
+
     def set_rf_level(self, rf_level):
         """Set the RF level in dB.
         Valid range -31.5 to 0"""
         self.rf_iface.set_atten(-rf_level)
+        self.rf_level = rf_level
+
+    def get_rf_level(self):
+        """Returns the RF level in dB"""
+        return self.rf_level
 
     def set_dc(self, dc_vec):
         """Set all 5 dc channels simultaneously"""
         self.dc_iface.set_all_dac_channels(*dc_vec)
+        self.dc_vec = dc_vec
+
+    def get_dc(self):
+        """Returns the DC vector"""
+        return self.dc_vec
 
     def ping(self):
         return True

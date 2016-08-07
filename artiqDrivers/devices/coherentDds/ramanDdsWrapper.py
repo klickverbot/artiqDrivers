@@ -43,6 +43,7 @@ class RamanDdsWrapperPhaseNoise(RamanDdsWrapperBase):
             if (freqDDS<self.rParaRange[0]) or (freqDDS>self.rParaRange[1]):
                 raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rParaRange[0]/1e6,self.rParaRange[1]/1e6))
             else:
+                print('Set rPara AOM to {}MHZ'.format(freqDDS/1e6))
                 self.dds.setProfile(0, profile, freqDDS, phase=phase, amp=amp)
             
         elif channel == 'rV':
@@ -65,15 +66,15 @@ class RamanDdsWrapper(RamanDdsWrapperBase):
         RamanDdsWrapperBase.__init__(self, dmgr, device)
         # range of sensible frequencies for rPara and rV        
         self.rParaRange = [70e6,120e6]
-        self.rVRange = [213e6,217e6]
+        self.rVRange = [213e6,218e6]
     
 
     def setProfile(self, channel, profile, freq, phase=0.0, amp=1.0, addQubitFreq = True):
         ''' channnel: rPara or rV, profile: 0...7, if addQubitFreq=True: the lasers used to create the frequency difference are split by 3.2GHz '''
+        freqRv = 215e6
         if addQubitFreq:
             freqDDS = self.msDiff+self.rH_freq-freq
         else:
-            freqRv = 215e6
             freqDDS = freqRv + freq
         
         if channel == 'rPara':
@@ -83,11 +84,12 @@ class RamanDdsWrapper(RamanDdsWrapperBase):
             if (freqDDS<self.rParaRange[0]) or (freqDDS>self.rParaRange[1]):
                 raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rParaRange[0]/1e6,self.rParaRange[1]/1e6))
             else:
+                print('Set rPara profile {} AOM to {}MHZ'.format(profile,freqDDS/1e6))
                 self.dds.setProfile(0, profile, freqDDS, phase=phase, amp=amp)
             
         elif channel == 'rV':
             # rV is +1st order, and at fixed frequency  
-            freqDDS = freqRv    
+            freqDDS = freqRv
             if (freqDDS<self.rVRange[0]) or (freqDDS>self.rVRange[1]):
                 raise ValueError("Rv frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rVRange[0]/1e6,self.rVRange[1]/1e6))
             else:

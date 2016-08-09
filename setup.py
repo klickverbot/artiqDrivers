@@ -7,7 +7,8 @@ scripts = [
     "trapDac_controller=artiqDrivers.frontend.trapDac_controller:main",
     "thorlabs_mdt69xb_controller=artiqDrivers.frontend.thorlabs_mdt69xb_controller:main",
     "rohdeSynth_controller=artiqDrivers.frontend.rohdeSynth_controller:main",
-    "tti_ql355_controller=artiqDrivers.frontend.tti_ql355_controller:main"
+    "tti_ql355_controller=artiqDrivers.frontend.tti_ql355_controller:main",
+    "scpi_synth_controller=artiqDrivers.frontend.scpi_synth_controller:main"
 ]
 
 setup(name='artiqDrivers',
@@ -22,8 +23,8 @@ setup(name='artiqDrivers',
               'artiqDrivers.devices.thorlabs_mdt69xb',
               'artiqDrivers.devices.trapDac',
               'artiqDrivers.devices.tti_ql355',
-              'artiqDrivers.profileSwitcher',
-              'artiqDrivers.profileSwitcher.profileSwitcher'
+              'artiqDrivers.devices.scpi_synth',
+              'artiqDrivers.profileSwitcher'
              ],
     entry_points={
         "console_scripts": scripts,

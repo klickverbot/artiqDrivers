@@ -43,7 +43,6 @@ class RamanDdsWrapperPhaseNoise(RamanDdsWrapperBase):
             if (freqDDS<self.rParaRange[0]) or (freqDDS>self.rParaRange[1]):
                 raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rParaRange[0]/1e6,self.rParaRange[1]/1e6))
             else:
-                print('Set rPara AOM to {}MHZ'.format(freqDDS/1e6))
                 self.dds.setProfile(0, profile, freqDDS, phase=phase, amp=amp)
             
         elif channel == 'rV':
@@ -84,7 +83,6 @@ class RamanDdsWrapper(RamanDdsWrapperBase):
             if (freqDDS<self.rParaRange[0]) or (freqDDS>self.rParaRange[1]):
                 raise ValueError("Rpara frequency out of range, {:.0f}MHz not in [{:.0f},{:.0f}]MHz".format(freqDDS/1e6,self.rParaRange[0]/1e6,self.rParaRange[1]/1e6))
             else:
-                print('Set rPara profile {} AOM to {}MHZ'.format(profile,freqDDS/1e6))
                 self.dds.setProfile(0, profile, freqDDS, phase=phase, amp=amp)
             
         elif channel == 'rV':

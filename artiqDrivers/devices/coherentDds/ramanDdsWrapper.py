@@ -70,7 +70,7 @@ class RamanDdsWrapper(RamanDdsWrapperBase):
 
     def setProfile(self, channel, profile, freq, phase=0.0, amp=1.0, addQubitFreq = True):
         ''' channnel: rPara or rV, profile: 0...7, if addQubitFreq=True: the lasers used to create the frequency difference are split by 3.2GHz '''
-        freqRv = 215e6
+        freqRv = 217.368568e6
         if addQubitFreq:
             freqDDS = self.msDiff+self.rH_freq-freq
         else:

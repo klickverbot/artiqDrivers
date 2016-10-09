@@ -1,6 +1,7 @@
 from setuptools import setup
 
 scripts = [
+    "bme_pulse_picker_timing_controller=artiqDrivers.frontend.bme_pulse_picker_timing_controller:main",
     "coherentDds_controller=artiqDrivers.frontend.coherentDds_controller:main",
     "dosDac_controller=artiqDrivers.frontend.dosDac_controller:main",
     "arduinoDds_controller=artiqDrivers.frontend.arduinoDds_controller:main",
@@ -17,6 +18,7 @@ setup(name='artiqDrivers',
               'artiqDrivers.frontend',
               'artiqDrivers.devices',
               'artiqDrivers.devices.arduinoDds',
+              'artiqDrivers.devices.bme_pulse_picker',
               'artiqDrivers.devices.coherentDds',
               'artiqDrivers.devices.dosDac',
               'artiqDrivers.devices.rohdeSynth',

@@ -8,4 +8,6 @@ Ports:
 - rhodeSynth_controller : 4004
 - trapDac_controller : 4005
 - tti_ql355_controller : 4006
-- bmePulsePicker_timing_controller : 4007
+- bme_pulse_picker_timing_controller : 4007
+- highfinesse-lsa-server : 4008 (external repo)
+- bme-hv-psu_controller : 4009 (external repo)

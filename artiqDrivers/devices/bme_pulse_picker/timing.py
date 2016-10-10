@@ -11,7 +11,7 @@ class TimingParams:
     microseconds."""
 
     # 80 MHz repetition rate
-    LASER_PERIOD_US = 1.25e-3
+    LASER_PERIOD_US = 12.5e-3
 
     # The safe hardware limit is actually 50 us, but with the delay
     # generator currently running at 10 MHz, the trigger pulses themselves
@@ -236,25 +236,25 @@ class PulsePickerTiming:
             PulseParameters(
                 True,
                 s_a_off,
-                0.0),
+                0.1),
             PulseParameters(
                 True,
                 s_a_off + self._times.pre_open_us + self._times.post_open_us,
-                0.0),
+                0.1),
             PulseParameters(
                 True,
                 s_b_off,
-                0.0),
+                0.1),
             PulseParameters(
                 True,
                 s_b_off + self._times.pre_open_us + self._times.post_open_us,
-                0.0),
+                0.1),
             PulseParameters(
                 True,
                 s_a_on + open_at_us - self._times.open_us / 2,
-                0.0),
+                0.1),
             PulseParameters(
                 True,
                 s_b_on + open_at_us + self._times.open_us / 2,
-                0.0),
+                0.1),
             ])

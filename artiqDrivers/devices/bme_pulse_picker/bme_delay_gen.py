@@ -143,7 +143,7 @@ class ClockSource(Enum):
 
 @unique
 class OutputGateMode(Enum):
-    """Modes for the delay generator to combine pairs of adjacient channels
+    """Modes for the delay generator to combine pairs of adjacent channels
     instead of directly routing them to the respective outputs."""
 
     #: Route channels to the respective outputs.
@@ -189,7 +189,7 @@ class BME_SG08p:
     # higher clock rate for our application to cut down on various internal
     # delays, 40 MHz. However, the timing values are not automatically rescaled
     # by the driver, so we need to manually stretch them.
-    CLOCK_FACTOR = 4
+    CLOCK_FACTOR = 1
 
     def __init__(self, driver_lib, device_idx):
         self._lib = driver_lib
@@ -265,13 +265,16 @@ class BME_SG08p:
         else:
             raise DelayGenException("Unrecognised clock source")
 
+        int_divider = int(16 / self.CLOCK_FACTOR)
+        ext_divider = int(8 / self.CLOCK_FACTOR)
         self._lib.set_g08_clock_parameters(
-            True, # Enable clock circuit
-            4,    # Internal oscillator divider (160 MHz base frequency)
-            2,    # Trigger input divider
-            1,    # Trigger input multiplier
-            s,   # 1: crystal, 2: trigger in, 3: trigger in with crystal as
-                  # fallback, 4: master/slave bus)
+            True,         # Enable clock circuit
+            int_divider,  # Internal oscillator divider (160 MHz base
+                          # frequency)
+            ext_divider,  # Trigger input divider (80 MHz input assumed)
+            1,            # Trigger input multiplier
+            s,            # 1: crystal, 2: trigger in, 3: trigger in with
+                          # crystal as fallback, 4: master/slave bus
             self._device_idx)
 
     def set_trigger(self, use_external_gate, inhibit_us):
@@ -336,6 +339,7 @@ class BME_SG08p:
         self._lib.activate_dg(self._device_idx)
 
     def _set_delay_channel(self, idx, params):
+        print(idx, "->", params.delay_us * self.CLOCK_FACTOR, ":", params.width_us * self.CLOCK_FACTOR)
         CHANNEL_A_IDX = 2
         self._lib.set_g08_delay(
             CHANNEL_A_IDX + idx, # Channel index
